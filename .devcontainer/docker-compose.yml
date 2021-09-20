@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/app
+    # working_dir: /app
+    command: ['php', '-S', '0.0.0.0:3000', '-t', 'public']
+    ports:
+      - '3000:3000'
+    environment:
+      BASE_URL: 'http://localhost:3000'
+

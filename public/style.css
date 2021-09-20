@@ -1,0 +1,54 @@
+html,
+body {
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  font-size: large;
+}
+
+input,
+select,
+textarea {
+  padding: 0.5em;
+}
+
+.row {
+  max-width: 800px;
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-group {
+  margin: 2rem 0;
+}
+
+label {
+  display: block;
+}
+
+span.required {
+  color: crimson;
+  margin-left: 0.2rem;
+}
+
+.errors {
+  color: crimson;
+}
