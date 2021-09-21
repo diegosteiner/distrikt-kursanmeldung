@@ -8,15 +8,15 @@ if(!empty($_REQUEST)) {
   $errors = [];
 
   if(checkParams() && checkSecurity()) {
-    $name = $_REQUEST['name'];
+    $name = preg_replace("([^\w\d])", '-', $_REQUEST['name']);
     $abteilung = $_REQUEST['abteilung'];
     $kurs = $_REQUEST['kurs'];
-    $target_dir = __DIR__ . "/uploads/$abteilung/" . preg_replace("([^\w\d])", '-', $name);
-    is_dir($target_dir) || mkdir($target_dir, 0755, true);
-    moveFiles($target_dir) || $errors[]= 'Angehängte Dateien konnten nicht verarbeitet werden';
+    $target_dir = "/uploads/$abteilung/$name";
+    is_dir(__DIR__ . $target_dir) || mkdir(__DIR__ . $target_dir, 0755, true);
+    moveFiles(__DIR__ . $target_dir) || $errors[]= 'Angehängte Dateien konnten nicht verarbeitet werden';
     empty($errors) && sendMail($name, $abteilung, $kurs);
   } else {
-    $errors[]= 'Angaben unvollständig';
+    $errors[]= 'Angaben unvollständig oder falsch';
   }
 }
 
@@ -50,7 +50,13 @@ function sendMail($name, $abteilung, $kurs)
   global $config;
 
   $to = $config['abteilungen'][$abteilung];
-  // if (!empty($to)) mail($to, "Anmeldeunterlagen von $name", "");
+  $url = $config['base_url'] . "/uploads/$abteilung/$name";
+
+  if (!empty($to)) 
+    mail($to, 
+      "Anmeldeunterlagen von $name ($kurs)", 
+      "Die Anmeldeunterlagen von $name von $abteilung für den Kurs '$kurs' wurden hochgeladen: $url"
+    );
   return true;
 }
 
