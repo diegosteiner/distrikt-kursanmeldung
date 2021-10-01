@@ -50,12 +50,12 @@ function sendMail($name, $abteilung, $kurs)
   global $config;
 
   $to = $config['abteilungen'][$abteilung];
-  $url = $config['base_url'] . "/uploads/$abteilung/$name";
+  $url = $config['base_url'] . "/uploads/$kurs/$name";
 
   if (!empty($to)) 
     mail($to, 
       "Anmeldeunterlagen von $name ($kurs)", 
-      "Die Anmeldeunterlagen von $name von $abteilung für den Kurs '$kurs' wurden hochgeladen: $url"
+      "Die Anmeldeunterlagen von $name von $abteilung für den Kurs '$kurs' wurden hochgeladen:\n\n$url"
     );
   return true;
 }
@@ -123,12 +123,17 @@ function sendMail($name, $abteilung, $kurs)
           <label><input required="required" type="radio" name="kurs" value="basis" id="kurs-basis" /> Basiskurs</label>
           <label><input required="required" type="radio" name="kurs" value="aufbau" id="kurs-aufbau" /> Aufbaukurs</label>
         </div>
-        <div class="form-group">
+        <div id="anmeldung-group" class="form-group">
           <label for="anmeldung-file">Unterschriebene Kursanmeldung als PDF<span class="required">*</span></label>
           <input type="file" name="anmeldung-file" multiple="false" accept=".pdf,application/pdf" id="anmeldung-file" />
         </div>
-        <div id="nothelfer-group" class="form-group">
-          <label for="nothelfer-file">Nothilfekurs Bestätigung als PDF</label>
+        <div id="over-18-group" class="form-group hidden">
+          <span class="or">oder</span>
+          <label for="over-18">
+          <input type="checkbox" id="over-18" name="over-18" /> Ich bin schon über 18</label>
+        </div>
+        <div id="nothelfer-group" class="hidden" class="form-group">
+          <label for="nothelfer-file">Nothilfekurs Bestätigung als PDF<span class="required">*</span></label>
           <input type="file" name="nothelfer-file" multiple="false" accept=".pdf,application/pdf" id="nothelfer-file" />
         </div>
         <div class="form-group">
@@ -143,6 +148,30 @@ function sendMail($name, $abteilung, $kurs)
       <p>Danke!</p>
     <?php endif; ?>
   </div>
+  <script>
+    const form = document.forms[0]
+    const nhkFormGroup = document.getElementById('nothelfer-group')
+    const nhkInput = nhkFormGroup.querySelector("input[type='file']")
+    const anmeldungFormGroup = document.getElementById('anmeldung-group')
+    const anmeldungInput = anmeldungFormGroup.querySelector("input[type='file']")
+    const over18FormGroup = document.getElementById('over-18-group')
+    
+    for(let radio of document.querySelectorAll("input[name='kurs']")) {
+      radio.addEventListener('change', (e) => {
+        const isBasis = e.target.value == 'basis' && e.target.checked
+        const isAufbau = e.target.value == 'aufbau' && e.target.checked
+        nhkFormGroup.classList.toggle('hidden', !isBasis) 
+        nhkInput.required = isBasis ? 'required' : ''
+        over18FormGroup.classList.toggle('hidden', !(isBasis || isAufbau)) 
+      })
+    }
+
+    document.querySelector("input[name='over-18']").addEventListener('change', (e) => {
+      const checked = e.target.checked
+      anmeldungInput.required = checked ? '' : 'required'
+      anmeldungFormGroup.querySelector('.required').classList.toggle('hidden', checked)
+    })
+  </script>
 </body>
 
 </html>
