@@ -7,16 +7,16 @@ header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 if(!empty($_REQUEST)) {
   $errors = [];
 
-  if(checkParams() && checkSecurity()) {
-    $name = preg_replace("([^\w\d])", '-', $_REQUEST['name']);
-    $abteilung = $_REQUEST['abteilung'];
-    $kurs = $_REQUEST['kurs'];
-    $target_dir = "/uploads/$abteilung/$name";
-    is_dir(__DIR__ . $target_dir) || mkdir(__DIR__ . $target_dir, 0755, true);
-    moveFiles(__DIR__ . $target_dir) || $errors[]= 'Angehängte Dateien konnten nicht verarbeitet werden';
-    empty($errors) && sendMail($name, $abteilung, $kurs);
-  } else {
-    $errors[]= 'Angaben unvollständig oder falsch';
+  if(!checkSecurity()) { $errors[]= 'Du bist kein echter Pfadi!'; }
+  if(!checkParams()) { $errors[]= 'Angaben unvollständig oder nicht gültig'; }
+  if(empty($errors)) {
+      $name = preg_replace("([^\w\d])", '-', $_REQUEST['name']);
+      $abteilung = $_REQUEST['abteilung'];
+      $kurs = $_REQUEST['kurs'];
+      $target_dir = "/uploads/$kurs/$name";
+      is_dir(__DIR__ . $target_dir) || mkdir(__DIR__ . $target_dir, 0755, true);
+      moveFiles(__DIR__ . $target_dir) || $errors[]= 'Angehängte Dateien konnten nicht verarbeitet werden';
+      empty($errors) && sendMail($name, $abteilung, $kurs);
   }
 }
 
@@ -24,14 +24,17 @@ function checkParams()
 {
   global $config;
 
+    // preg_match("/\A(pio|futura|basis|aufbau)_/", strtolower($_REQUEST['kurs']));
   return isset($_REQUEST['name']) &&
     array_key_exists($_REQUEST['abteilung'], $config['abteilungen']) &&
-    in_array(strtolower($_REQUEST['kurs']), ['pio', 'futura', 'basis', 'aufbau']);
+    in_array(strtolower($_REQUEST['kurs']), ['pio_glattal', 'pio_limmat', 'futura_glattal', 'futura_limmat_1',
+                                             'futura_limmat_2', 'basis_wolf', 'basis_pfadi', 
+                                             'aufbau_wolf', 'aufbau_pfadi']);
 }
 
 function checkSecurity()
 {
-  return in_array(strtolower($_REQUEST['security-question']), ['krawatte', 'grawatte', 'foulard']);
+  return preg_match("/\A(foulard|[cgk]ra[vw]att?e)\z/", strtolower($_REQUEST['security-question']));
 }
 
 function moveFiles($target_dir)
@@ -117,11 +120,28 @@ function sendMail($name, $abteilung, $kurs)
           </select>
         </div>
         <div class="form-group">
-          <label>Kurs<span class="required">*</span></label>
-          <label><input required="required" type="radio" name="kurs" value="pio" id="kurs-pio" /> Piokurs</label>
-          <label><input required="required" type="radio" name="kurs" value="futura" id="kurs-futura" /> Futurakurs</label>
-          <label><input required="required" type="radio" name="kurs" value="basis" id="kurs-basis" /> Basiskurs</label>
-          <label><input required="required" type="radio" name="kurs" value="aufbau" id="kurs-aufbau" /> Aufbaukurs</label>
+          <label for="kurs">Kurs<span class="required">*</span></label>
+          <select name="kurs" id="kurs" required="required" aria-required="true">
+            <option value=""></option>
+
+            <optgroup label="Piokurs">
+              <option value="pio_glattal">Piokurs Glattal</option>
+              <option value="pio_limmat">Piokurs Limmat/Uto</option>
+            </optgroup>
+            <optgroup label="Futurakurs">
+              <option value="futura_glattal">Futura Glattal</option>
+              <option value="futura_limmat_1">Futura Limmat/Uto 1</option>
+              <option value="futura_limmat_2">Futura Limmat/Uto 2</option>
+            </optgroup>
+            <optgroup label="Basiskurs">
+              <option value="basis_wolf">Basis Wolfsstufe</option>
+              <option value="basis_pfadi">Basis Pfadistufe</option>
+            </optgroup>
+            <optgroup label="Aufbaukurs">
+              <option value="aufbau_wolf">Aufbau Wolfsstufe</option>
+              <option value="aufbau_pfadi">Aufbau Pfadistufe</option>
+            </optgroup>
+          </select>
         </div>
         <div id="anmeldung-group" class="form-group">
           <label for="anmeldung-file">Unterschriebene Kursanmeldung als PDF<span class="required">*</span></label>
@@ -156,10 +176,10 @@ function sendMail($name, $abteilung, $kurs)
     const anmeldungInput = anmeldungFormGroup.querySelector("input[type='file']")
     const over18FormGroup = document.getElementById('over-18-group')
     
-    for(let radio of document.querySelectorAll("input[name='kurs']")) {
+    for(let radio of document.querySelectorAll("select[name='kurs']")) {
       radio.addEventListener('change', (e) => {
-        const isBasis = e.target.value == 'basis' && e.target.checked
-        const isAufbau = e.target.value == 'aufbau' && e.target.checked
+        const isBasis = e.target.value.startsWith('basis_')
+        const isAufbau = e.target.value.startsWith('aufbau_')
         nhkFormGroup.classList.toggle('hidden', !isBasis) 
         nhkInput.required = isBasis ? 'required' : ''
         over18FormGroup.classList.toggle('hidden', !(isBasis || isAufbau)) 
