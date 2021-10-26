@@ -145,7 +145,7 @@ function sendMail($name, $abteilung, $kurs)
         </div>
         <div id="anmeldung-group" class="form-group">
           <label for="anmeldung-file">Unterschriebene Kursanmeldung als PDF<span class="required">*</span></label>
-          <input type="file" name="anmeldung-file" multiple="false" accept=".pdf,application/pdf" id="anmeldung-file" />
+          <input type="file" name="anmeldung-file" required='required' multiple="false" accept=".pdf,application/pdf" id="anmeldung-file" />
         </div>
         <div id="over-18-group" class="form-group hidden">
           <span class="or">oder</span>
