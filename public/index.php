@@ -24,8 +24,8 @@ function checkParams()
 {
   global $config;
 
-    // preg_match("/\A(pio|futura|basis|aufbau)_/", strtolower($_REQUEST['kurs']));
   return isset($_REQUEST['name']) &&
+    ($_FILES["anmeldung-file"]["error"] == 0 || $_REQUEST['over-18'] == '1') &&
     array_key_exists($_REQUEST['abteilung'], $config['abteilungen']) &&
     in_array(strtolower($_REQUEST['kurs']), ['pio_glattal', 'pio_limmat', 'futura_glattal', 'futura_limmat_1',
                                              'futura_limmat_2', 'basis_wolf', 'basis_pfadi', 
@@ -150,7 +150,7 @@ function sendMail($name, $abteilung, $kurs)
         <div id="over-18-group" class="form-group hidden">
           <span class="or">oder</span>
           <label for="over-18">
-          <input type="checkbox" id="over-18" name="over-18" /> Ich bin schon über 18</label>
+          <input type="checkbox" id="over-18" name="over-18" value="1" /> Ich bin schon über 18</label>
         </div>
         <div id="nothelfer-group" class="hidden" class="form-group">
           <label for="nothelfer-file">Nothilfekurs Bestätigung als PDF<span class="required">*</span></label>
