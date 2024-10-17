@@ -27,9 +27,7 @@ function checkParams()
   return isset($_REQUEST['name']) &&
     ($_FILES["anmeldung-file"]["error"] == 0 || $_REQUEST['over-18'] == '1') &&
     array_key_exists($_REQUEST['abteilung'], $config['abteilungen']) &&
-    in_array(strtolower($_REQUEST['kurs']), ['pio_glattal', 'pio_limmat', 'futura_glattal', 'futura_limmat_1',
-                                             'futura_limmat_2', 'basis_wolf', 'basis_pfadi', 
-                                             'aufbau_wolf', 'aufbau_pfadi']);
+    in_array(strtolower($_REQUEST['kurs']), array_keys($config['kurse']));
 }
 
 function checkSecurity()
@@ -123,24 +121,12 @@ function sendMail($name, $abteilung, $kurs)
           <label for="kurs">Kurs<span class="required">*</span></label>
           <select name="kurs" id="kurs" required="required" aria-required="true">
             <option value=""></option>
-
-            <optgroup label="Piokurs">
-              <option value="pio_glattal">Piokurs Glattal</option>
-              <option value="pio_limmat">Piokurs Limmat/Uto</option>
-            </optgroup>
-            <optgroup label="Futurakurs">
-              <option value="futura_glattal">Futura Glattal</option>
-              <option value="futura_limmat_1">Futura Limmat/Uto 1</option>
-              <option value="futura_limmat_2">Futura Limmat/Uto 2</option>
-            </optgroup>
-            <optgroup label="Basiskurs">
-              <option value="basis_wolf">Basis Wolfsstufe</option>
-              <option value="basis_pfadi">Basis Pfadistufe</option>
-            </optgroup>
-            <optgroup label="Aufbaukurs">
-              <option value="aufbau_wolf">Aufbau Wolfsstufe</option>
-              <option value="aufbau_pfadi">Aufbau Pfadistufe</option>
-            </optgroup>
+            
+            <?php
+            foreach($config['kurse'] as $value => $label) {
+                print "<option value='$value'>$label</option>";
+            }
+            ?>
           </select>
         </div>
         <div id="anmeldung-group" class="form-group">
